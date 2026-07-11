@@ -89,7 +89,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!supabaseUrl || !supabaseKey) return;
-    supabaseRequest("adoptions?select=id,adopter_name,plant_name,plant_type,created_at&order=created_at.desc&limit=8")
+    supabaseRequest("adoptions?select=id,adopter_name,plant_name,plant_type,created_at&order=created_at.desc&limit=12")
       .then(async (response) => {
         if (!response.ok) throw new Error();
         const rows = (await response.json()) as Adoption[];
@@ -129,7 +129,7 @@ export default function Home() {
         throw new Error(detail || `Supabase respondió con estado ${response.status}`);
       }
       const [created] = (await response.json()) as Adoption[];
-      setAdoptions((current) => [created, ...current].slice(0, 8));
+      setAdoptions((current) => [created, ...current].slice(0, 12));
       setStatus("success");
       setAdopterName("");
       setPlantName("");
@@ -151,7 +151,7 @@ export default function Home() {
         </nav>
       </header>
 
-      <section className="hero" id="inicio">
+      <section className="hero-wrap" id="inicio"><div className="hero">
         <div className="hero-copy">
           <p className="eyebrow">Adopción botánica digital</p>
           <h1>Una planta para cada personalidad</h1>
@@ -161,10 +161,11 @@ export default function Home() {
         <div className="plant-poster" aria-label="Tu match: Monstera">
           <span className="match-sticker">TU MATCH<br/>♥</span>
           <span className="easy-sticker">FÁCIL<br/>DE CUIDAR</span>
-          <div className="hero-plant">🌿</div>
+          <img className="hero-plant" src="/hero-monstera.webp" alt="Ilustración de una Monstera en maceta de terracota" />
           <div className="poster-caption"><strong>MONSTERA</strong><span>Curiosa · Creativa · Independiente</span></div>
           <span className="adopt-stamp">ADOPTA<br/>DIGITALMENTE</span>
-        </div>
+        </div></div>
+        <div className="hero-recent"><div className="hero-recent-title"><strong>Adopciones recientes</strong><span>Actualizado en vivo</span></div><div className="hero-adoption-grid">{adoptions.slice(0,3).map((item,index)=><article key={`hero-${item.id}`}><div className={`mini-plant plant-${index%4}`} aria-hidden="true"/><div><strong>{item.adopter_name} adoptó a {item.plant_name}</strong><span>{item.plant_type}</span><time>{timeAgo(item.created_at)} · {localDateTime(item.created_at)}</time></div></article>)}</div></div>
       </section>
 
       <section className="how" id="como-funciona">
@@ -198,7 +199,7 @@ export default function Home() {
       <section className="community" id="comunidad">
         <div className="community-title"><div><span>EN VIVO</span><h2>Adopciones recientes</h2></div><p>Una pequeña comunidad que no deja de crecer.</p></div>
         <div className="timeline">
-          {adoptions.map((item, index) => <article className="adoption" key={item.id}><div className="plant-avatar" aria-hidden="true">{item.plant_type === "Sansevieria" ? "🌱" : item.plant_type === "Peperomia" ? "🪴" : "🌿"}</div><div><strong>{item.adopter_name} adoptó a {item.plant_name}</strong><span>{item.plant_type}</span><time dateTime={item.created_at}>{timeAgo(item.created_at)} · {localDateTime(item.created_at)} (hora local)</time></div><b className="timeline-number">{String(index + 1).padStart(2,"0")}</b></article>)}
+          {adoptions.map((item, index) => <article className="adoption" key={item.id}><div className={`plant-avatar mini-plant plant-${index%4}`} aria-hidden="true"/><div><strong>{item.adopter_name} adoptó a {item.plant_name}</strong><span>{item.plant_type}</span><time dateTime={item.created_at}>{timeAgo(item.created_at)} · {localDateTime(item.created_at)} (hora local)</time></div><b className="timeline-number">{String(index + 1).padStart(2,"0")}</b></article>)}
         </div>
       </section>
       <footer><strong>PlantMatch</strong><span>Un proyecto ficticio sobre plantas reales.</span></footer>
