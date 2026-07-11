@@ -84,6 +84,7 @@ export default function Home() {
   const [adopterName, setAdopterName] = useState("");
   const [plantName, setPlantName] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorDetail, setErrorDetail] = useState("");
   const match = useMemo(() => plantMatch(answers), [answers]);
 
   useEffect(() => {
@@ -101,6 +102,7 @@ export default function Home() {
     event.preventDefault();
     if (!adopterName.trim() || !plantName.trim()) return;
     setStatus("sending");
+    setErrorDetail("");
     const payload = {
       adopter_name: adopterName.trim(),
       plant_name: plantName.trim(),
@@ -117,14 +119,23 @@ export default function Home() {
         headers: { Prefer: "return=representation" },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error();
+      if (!response.ok) {
+        const raw = await response.text();
+        let detail = raw;
+        try {
+          const parsed = JSON.parse(raw) as { message?: string; details?: string; hint?: string; code?: string };
+          detail = [parsed.message, parsed.details, parsed.hint, parsed.code && `Código ${parsed.code}`].filter(Boolean).join(" · ");
+        } catch {}
+        throw new Error(detail || `Supabase respondió con estado ${response.status}`);
+      }
       const [created] = (await response.json()) as Adoption[];
       setAdoptions((current) => [created, ...current].slice(0, 8));
       setStatus("success");
       setAdopterName("");
       setPlantName("");
       document.querySelector("#comunidad")?.scrollIntoView({ behavior: "smooth" });
-    } catch {
+    } catch (error) {
+      setErrorDetail(error instanceof Error ? error.message : "Error desconocido");
       setStatus("error");
     }
   }
@@ -180,7 +191,7 @@ export default function Home() {
           </div>
           <label className="honeypot" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off"/></label>
           <button className="submit-button" disabled={status === "sending"}>{status === "sending" ? "Guardando adopción…" : `Adoptar mi ${match.name} →`}</button>
-          <p className={`form-message ${status}`}>{status === "success" && "¡Adopción registrada! Ya forma parte de la comunidad."}{status === "error" && "No pudimos guardar la adopción. Revisa la conexión con Supabase e inténtalo de nuevo."}</p>
+          <p className={`form-message ${status}`}>{status === "success" && "¡Adopción registrada! Ya forma parte de la comunidad."}{status === "error" && <>No pudimos guardar la adopción. <small className="error-detail">Detalle: {errorDetail}</small></>}</p>
         </form>
       </section>
 
