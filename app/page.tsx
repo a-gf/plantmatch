@@ -37,6 +37,14 @@ function plantMatch(a: Answers) {
   return plants.pothos;
 }
 
+function plantArtworkClass(plantType: string) {
+  const normalized = plantType.toLowerCase();
+  if (normalized.includes("sansevieria")) return "plant-0";
+  if (normalized.includes("peperomia")) return "plant-1";
+  if (normalized.includes("pothos")) return "plant-2";
+  return "plant-3";
+}
+
 function timeAgo(value: string) {
   const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000));
   if (minutes < 1) return "Ahora mismo";
@@ -143,7 +151,7 @@ export default function Home() {
   return (
     <main>
       <header className="site-header">
-        <a className="brand" href="#inicio" aria-label="PlantMatch, inicio"><span>🌱</span> PlantMatch</a>
+        <a className="brand" href="#inicio" aria-label="PlantMatch, inicio"><span className="logo-mark" aria-hidden="true"><i/><i/><i/></span><span className="brand-name">PlantMatch</span></a>
         <nav aria-label="Navegación principal">
           <a href="#como-funciona">Cómo funciona</a>
           <a href="#test">Plantas</a>
@@ -165,7 +173,7 @@ export default function Home() {
           <div className="poster-caption"><strong>MONSTERA</strong><span>Curiosa · Creativa · Independiente</span></div>
           <span className="adopt-stamp">ADOPTA<br/>DIGITALMENTE</span>
         </div></div>
-        <div className="hero-recent"><div className="hero-recent-title"><strong>Adopciones recientes</strong><span>Actualizado en vivo</span></div><div className="hero-adoption-grid">{adoptions.slice(0,3).map((item,index)=><article key={`hero-${item.id}`}><div className={`mini-plant plant-${index%4}`} aria-hidden="true"/><div><strong>{item.adopter_name} adoptó a {item.plant_name}</strong><span>{item.plant_type}</span><time>{timeAgo(item.created_at)} · {localDateTime(item.created_at)}</time></div></article>)}</div></div>
+        <div className="hero-recent"><div className="hero-recent-title"><strong>Adopciones recientes</strong><span>Actualizado en vivo</span></div><div className="hero-adoption-grid">{adoptions.slice(0,3).map((item)=><article key={`hero-${item.id}`}><div className={`mini-plant ${plantArtworkClass(item.plant_type)}`} aria-hidden="true"/><div><strong>{item.adopter_name} adoptó a {item.plant_name}</strong><span>{item.plant_type}</span><time>{timeAgo(item.created_at)} · {localDateTime(item.created_at)}</time></div></article>)}</div></div>
       </section>
 
       <section className="how" id="como-funciona">
@@ -185,7 +193,7 @@ export default function Home() {
             <label className="select-label">¿Tienes mascotas?<select value={answers.pets} onChange={(e)=>setAnswers({...answers,pets:e.target.value as Answers['pets']})}><option value="no">No</option><option value="yes">Sí</option></select></label>
             <label className="select-label">Tu experiencia<select value={answers.experience} onChange={(e)=>setAnswers({...answers,experience:e.target.value as Answers['experience']})}><option value="new">Soy principiante</option><option value="some">Ya he tenido plantas</option><option value="expert">Tengo mano verde</option></select></label>
           </div>
-          <div className="result-card"><span className="result-icon">{match.icon}</span><div><small>TU MATCH ES</small><h3>{match.name}</h3><p>{match.traits}</p></div></div>
+          <div className="result-card"><div className={`result-plant mini-plant ${plantArtworkClass(match.name)}`} aria-hidden="true"/><div><small>TU MATCH ES</small><h3>{match.name}</h3><p>{match.traits}</p></div></div>
           <div className="name-fields">
             <label>Tu apodo público<input maxLength={24} value={adopterName} onChange={(e)=>setAdopterName(e.target.value)} placeholder="Ej. Luna" required/></label>
             <label>Nombre de tu planta<input maxLength={24} value={plantName} onChange={(e)=>setPlantName(e.target.value)} placeholder="Ej. Menta" required/></label>
@@ -199,7 +207,7 @@ export default function Home() {
       <section className="community" id="comunidad">
         <div className="community-title"><div><span>EN VIVO</span><h2>Adopciones recientes</h2></div><p>Una pequeña comunidad que no deja de crecer.</p></div>
         <div className="timeline">
-          {adoptions.map((item, index) => <article className="adoption" key={item.id}><div className={`plant-avatar mini-plant plant-${index%4}`} aria-hidden="true"/><div><strong>{item.adopter_name} adoptó a {item.plant_name}</strong><span>{item.plant_type}</span><time dateTime={item.created_at}>{timeAgo(item.created_at)} · {localDateTime(item.created_at)} (hora local)</time></div><b className="timeline-number">{String(index + 1).padStart(2,"0")}</b></article>)}
+          {adoptions.map((item, index) => <article className="adoption" key={item.id}><div className={`plant-avatar mini-plant ${plantArtworkClass(item.plant_type)}`} aria-hidden="true"/><div><strong>{item.adopter_name} adoptó a {item.plant_name}</strong><span>{item.plant_type}</span><time dateTime={item.created_at}>{timeAgo(item.created_at)} · {localDateTime(item.created_at)} (hora local)</time></div><b className="timeline-number">{String(index + 1).padStart(2,"0")}</b></article>)}
         </div>
       </section>
       <footer><strong>PlantMatch</strong><span>Un proyecto ficticio sobre plantas reales.</span></footer>
